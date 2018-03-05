@@ -58,7 +58,7 @@
 - (void)updateTitle:(NSString *)title atIndex:(NSInteger)index;
 - (void)updateTittles:(NSArray<NSString *> *)titles atIndexArray:(NSArray<NSNumber *> *)indexArray;
 
-//@property (nonatomic, strong)
+
 - (instancetype)initWithFrame:(CGRect)frame  NS_DESIGNATED_INITIALIZER;
 
 @end

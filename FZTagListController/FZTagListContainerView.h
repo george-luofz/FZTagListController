@@ -10,15 +10,17 @@
 
 // 1.滚动
 // 1.1.滚动时进度告诉tag视图
-// 1.2
+// 1.2 滚动到指定位置
 @protocol FZTagListContainerViewDelegate <NSObject>
-- (void)scrollContainerViewFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress animated:(BOOL)animated;
+- (void)FZTagListContainerViewScrollCurrentOffSet:(CGPoint)curOffSet beforeOffSet:(CGPoint)beforeOffSet;
 @end
 
 @interface FZTagListContainerView : UIView
 @property (nonatomic, assign) id<FZTagListContainerViewDelegate> delegate;
+@property (nonatomic, assign) CGSize    contentSize;
 
+- (void)scrollContainerViewToOffset:(CGPoint)offSet animated:(BOOL)animated;
+//- (void)addSubView:(UIView *)view atIndex:(NSInteger)index;
 
-- (void)scrollContainerViewFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated;
 
 @end

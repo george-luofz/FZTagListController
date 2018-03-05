@@ -69,24 +69,29 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     
 }
 
-- (void)transitionFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
-    
-//    [self _transitionUnderLineFromIndex:fromIndex toIndex:toIndex animated:animated];
-//    [self _transitionCellItemFromIndex:fromIndex toIndex:toIndex animated:animated];
+- (void)clickFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
+    if(fromIndex == toIndex) return;
+    if(toIndex == _currentSelectIndex) return;
+    _currentSelectIndex = toIndex;
+    // 1.underLine
+    [self _clickUnderLineFromIndex:fromIndex toIndex:toIndex animated:animated];
+    // 2.item
+    [self _clickCellItemFromIndex:fromIndex toIndex:toIndex animated:animated];
 }
 
 - (void)transitionFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress animated:(BOOL)animated{
     if(fromIndex == toIndex) return;
     if(toIndex == _currentSelectIndex) return;
-    
-    // 1.
+    _currentSelectIndex = toIndex;
+    // 1.underLine
+    [self _transitionUnderLineFromIndex:fromIndex toIndex:toIndex progress:progress animated:animated];
+    // 2.item
+    [self _transitionCellItemFromIndex:fromIndex toIndex:toIndex animated:animated];
 }
 
 #pragma mark - private method
-
 #pragma mark -- setup frames
 - (void)_setupSubViewFrame{
-    
     CGRect collectionViewFrame = _collectionView.frame;
     // 修改左侧custom frame
     if(_leftEdgeCustomView){
@@ -98,7 +103,6 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
         CGRect rightCustomOriginframe = _rightEdgeCustomView.frame;
         _rightEdgeCustomView.frame = CGRectMake(self.frame.size.width - rightCustomOriginframe.size.width, rightCustomOriginframe.origin.y, rightCustomOriginframe.size.width, rightCustomOriginframe.size.height);
     }
-    
     // 修改collectionView frame
     CGFloat collectViewOriginX = _leftEdgeCustomView ? CGRectGetMaxX(_leftEdgeCustomView.frame) : collectionViewFrame.origin.x;
     CGFloat collectViewWidth = _rightEdgeCustomView ? CGRectGetMinX(_rightEdgeCustomView.frame) - collectViewOriginX : self.frame.size.width - collectViewOriginX;
@@ -116,19 +120,10 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
         _underLine.frame = CGRectMake(underLineOriginX, self.frame.size.height - KDefaultUnderlineHeight, cellFrame.size.width, KDefaultUnderlineHeight);
     }
 }
-
+#pragma mark - scroll to index
 - (void)_transitionUnderLineFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress animated:(BOOL)animated{
-    // 1. 点击item，直接跳过去
     CGRect fromIndexCellFrame = [self _cellFrameAtIndex:fromIndex];
     CGRect toIndexCellFrame = [self _cellFrameAtIndex:toIndex];
-    if(progress == 1){
-        CGFloat animationDuration = 0.25;
-        [UIView animateWithDuration:animationDuration animations:^{
-            _underLine.frame = toIndexCellFrame;
-        }];
-        return;
-    }
-    // 2. 滑动，跟着走就行了
     CGFloat currentOriginX = toIndexCellFrame.origin.x - (toIndexCellFrame.origin.x - fromIndexCellFrame.origin.x) * progress;
     CGFloat currentWidth = toIndexCellFrame.size.width - (toIndexCellFrame.size.width - fromIndexCellFrame.size.width) * progress;
     CGRect currentUnderLineFrame = CGRectMake(currentOriginX, fromIndexCellFrame.origin.y, currentWidth, fromIndexCellFrame.size.height);
@@ -139,6 +134,19 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     
 }
 
+#pragma mark - click to index
+- (void)_clickUnderLineFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
+    CGRect toIndexCellFrame = [self _cellFrameAtIndex:toIndex];
+    CGRect toIndexUnderLineFrame = CGRectMake(toIndexCellFrame.origin.x, _underLine.frame.origin.y, toIndexCellFrame.size.width, _underLine.frame.size.height);
+    CGFloat animationDuration = _underLineAnimationDuration ? : KDefaultUnderLineAnimationDuration;
+    [UIView animateWithDuration:animationDuration animations:^{
+        _underLine.frame = toIndexUnderLineFrame;
+    }];
+}
+
+- (void)_clickCellItemFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
+    
+}
 #pragma mark - subView
 
 - (void)_addSubView{
@@ -182,7 +190,7 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 }
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section{
-    return _tagHorizontalMargin?:KDefaultTagHorizontalMargin;
+    return _tagHorizontalMargin ? : KDefaultTagHorizontalMargin;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
@@ -196,9 +204,9 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     // 1.选择某个item
-    [self transitionFromIndex:_currentSelectIndex toIndex:indexPath.item animated:YES];
+    [self clickFromIndex:_currentSelectIndex toIndex:indexPath.item animated:YES];
     // 2.回调代理
-    
+//    if(self.delegate && self.delegate respondsToSelector:@selector(<#selector#>))
 }
 
 #pragma mark - scrollView delegate
@@ -226,8 +234,6 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     textSize = CGSizeMake(frame.size.width, frame.size.height + 1);
     return frame.size.width;
 }
-
-
 
 @end
 

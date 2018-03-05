@@ -35,6 +35,7 @@
 @property (nonatomic, strong) UIView    *leftEdgeCustomView;        //左侧自定义视图
 @property (nonatomic, strong) UIView    *rightEdgeCustomView;       //右侧自定义视图
 @property (nonatomic, assign) CGFloat   underLineAnimationDuration; //下划线滚动动画时长，默认0.25f
+//@property (nonatomic, )
 - (void)setupRenderPreference;
 
 // 2.数据部分

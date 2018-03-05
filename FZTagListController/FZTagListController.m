@@ -12,12 +12,14 @@
 
 static CGFloat KDefaultTagListViewHeight = 44;
 
-@interface FZTagListController()<FZTagListViewDelegate>
+@interface FZTagListController()<FZTagListViewDelegate,FZTagListContainerViewDelegate>
 {
     FZTagListView           *_listView;
     FZTagListContainerView  *_listContainerView;
     
     NSArray *_originalTitles;
+    
+    NSInteger _curSelectIndex;
 }
 @end
 
@@ -57,6 +59,14 @@ static CGFloat KDefaultTagListViewHeight = 44;
         _originalTitles =  [self.dataSource titles];
         [_listView setUpStringArray:_originalTitles];
     }
+    
+    // containerView setup
+    // 4. frame
+    _listContainerView.frame = CGRectMake(0, CGRectGetMaxY(_listView.frame), self.frame.size.width, self.frame.size.height - CGRectGetMaxY(_listView.frame));
+    // 5.contentSize
+    _listContainerView.contentSize = CGSizeMake(self.frame.size.width * _originalTitles.count? : 1, 0);
+    // 6.load view
+    
 }
 
 - (void)_addTagListView{
@@ -67,9 +77,30 @@ static CGFloat KDefaultTagListViewHeight = 44;
 }
 
 - (void)_addContainerView{
+    FZTagListContainerView *listContainerView = [[FZTagListContainerView alloc] init];
+    listContainerView.delegate = self;
+    [self addSubview:listContainerView];
     
+    _listContainerView = listContainerView;
 }
 
-#pragma mark --  view height
+#pragma mark --  FZTagListContainerView delegate
+- (void)FZTagListContainerViewScrollCurrentOffSet:(CGPoint)curOffSet beforeOffSet:(CGPoint)beforeOffSet{
+    CGFloat curOffSetX = curOffSet.x;
+    CGFloat beforeOffSetX = beforeOffSet.x;
+    CGFloat progress = fabs(curOffSetX - beforeOffSetX);
+    NSInteger toIndex = _curSelectIndex;
+    if(curOffSetX < beforeOffSetX){
+        toIndex = _curSelectIndex > 1?_curSelectIndex - 1 : _curSelectIndex;
+    }else{
+        toIndex = (_curSelectIndex + 1) == (_originalTitles.count - 1) ? _curSelectIndex + 1 : _curSelectIndex;
+    }
+    // listView transition
+    [_listView transitionFromIndex:_curSelectIndex toIndex:toIndex progress:progress animated:YES];
+}
 
+#pragma mark -- FZTagListView delegate
+- (void)FZTagListView:(FZTagListView *)tagListView clickAtIndex:(NSInteger)index{
+    _curSelectIndex = index;
+}
 @end
