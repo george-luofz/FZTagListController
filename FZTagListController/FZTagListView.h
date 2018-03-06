@@ -15,6 +15,7 @@
 
 @end
 
+@class FZTagListController;
 @interface FZTagListView : UIView
 @property (nonatomic, assign)   id<FZTagListViewDelegate>   delegate;
 @property (nonatomic) id style;
@@ -35,7 +36,9 @@
 @property (nonatomic, strong) UIView    *leftEdgeCustomView;        //左侧自定义视图
 @property (nonatomic, strong) UIView    *rightEdgeCustomView;       //右侧自定义视图
 @property (nonatomic, assign) CGFloat   underLineAnimationDuration; //下划线滚动动画时长，默认0.25f
-//@property (nonatomic, )
+
+@property (nonatomic, weak)   FZTagListController   *listController; //引用父视图，可以拿它的属性
+// 更新配置
 - (void)setupRenderPreference;
 
 // 2.数据部分

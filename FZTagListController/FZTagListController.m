@@ -19,7 +19,7 @@ static CGFloat KDefaultTagListViewHeight = 44;
     
     NSArray *_originalTitles;
     
-    NSInteger _curSelectIndex;
+    NSCache *_cache;
 }
 @end
 
@@ -34,7 +34,47 @@ static CGFloat KDefaultTagListViewHeight = 44;
 }
 
 - (void)setUpView{
-    // listView
+    // 1.listView
+    [self _setUpListView];
+    
+    // 2.update data
+    if(self.dataSource && [self.dataSource respondsToSelector:@selector(titles)]){
+        _originalTitles =  [self.dataSource titles];
+        [_listView setUpStringArray:_originalTitles];
+    }
+
+    // 3.containerView setup
+    [self _setupContainerView];
+    // 4.load view
+    for(int i = 0 ; i < _originalTitles.count ; i++){
+        CGRect frame = CGRectMake(i*self.frame.size.width, 0, self.frame.size.width, self.frame.size.height);
+        UIView *view = [[UIView alloc] initWithFrame:frame];
+        view.backgroundColor = [UIColor colorWithRed:arc4random()%255/255.0 green:arc4random()%255/255.0 blue:arc4random()%255/255.0 alpha:1.0];
+        [_listContainerView addSubview:view];
+    }
+//    if(self.dataSource && [self.dataSource respondsToSelector:@selector(viewForTagListControllerAtIndex:)]){
+//        UIView *currentLoadView = [self.dataSource viewForTagListControllerAtIndex:_currentSelectIndex];
+//        [_listContainerView addSubView:currentLoadView atIndex:_currentSelectIndex];
+//    }
+    
+}
+
+- (void)_addTagListView{
+    FZTagListView *listView = [[FZTagListView alloc] init];
+    listView.delegate = self;
+    [self addSubview:listView];
+    _listView = listView;
+}
+
+- (void)_addContainerView{
+    FZTagListContainerView *listContainerView = [[FZTagListContainerView alloc] init];
+    listContainerView.scrollDelegate = self;
+    [self addSubview:listContainerView];
+    
+    _listContainerView = listContainerView;
+}
+#pragma mark -- setup View
+- (void)_setUpListView{
     // 1.height
     _listView.frame = CGRectMake(0, 0, self.frame.size.width, _tagListHeight?:KDefaultTagListViewHeight);
     // 2.setup view
@@ -53,54 +93,48 @@ static CGFloat KDefaultTagListViewHeight = 44;
     _listView.underlineLength = 0;
     
     [_listView setupRenderPreference];
-    
-    // 3.update data
-    if(self.dataSource && [self.dataSource respondsToSelector:@selector(titles)]){
-        _originalTitles =  [self.dataSource titles];
-        [_listView setUpStringArray:_originalTitles];
-    }
-    
-    // containerView setup
-    // 4. frame
+}
+
+- (void)_setupContainerView{
+    // 1. frame
     _listContainerView.frame = CGRectMake(0, CGRectGetMaxY(_listView.frame), self.frame.size.width, self.frame.size.height - CGRectGetMaxY(_listView.frame));
-    // 5.contentSize
-    _listContainerView.contentSize = CGSizeMake(self.frame.size.width * _originalTitles.count? : 1, 0);
-    // 6.load view
-    
+    // 2. contentSize
+    _listContainerView.contentSize = CGSizeMake(self.frame.size.width * _originalTitles.count, _listContainerView.frame.size.height);
+    // 3. currentOffset
+    [_listContainerView setUpInitOffset:CGPointMake(self.frame.size.width * _currentSelectIndex, 0)];
 }
 
-- (void)_addTagListView{
-    FZTagListView *listView = [[FZTagListView alloc] init];
-    listView.delegate = self;
-    [self addSubview:listView];
-    _listView = listView;
-}
-
-- (void)_addContainerView{
-    FZTagListContainerView *listContainerView = [[FZTagListContainerView alloc] init];
-    listContainerView.delegate = self;
-    [self addSubview:listContainerView];
-    
-    _listContainerView = listContainerView;
-}
-
-#pragma mark --  FZTagListContainerView delegate
 - (void)FZTagListContainerViewScrollCurrentOffSet:(CGPoint)curOffSet beforeOffSet:(CGPoint)beforeOffSet{
+    // 1.计算下方滑动进度
     CGFloat curOffSetX = curOffSet.x;
-    CGFloat beforeOffSetX = beforeOffSet.x;
-    CGFloat progress = fabs(curOffSetX - beforeOffSetX);
-    NSInteger toIndex = _curSelectIndex;
-    if(curOffSetX < beforeOffSetX){
-        toIndex = _curSelectIndex > 1?_curSelectIndex - 1 : _curSelectIndex;
+    CGFloat pageWidth = _listContainerView.frame.size.width;
+    CGFloat currentFloorIndex = floor(curOffSetX / pageWidth); //计算得到index
+    
+    CGFloat progress = (curOffSetX - currentFloorIndex * pageWidth) / pageWidth;
+    
+    // 2.计算方向，告知listView索引
+    BOOL isScrollViewToRight = curOffSetX > beforeOffSet.x ? 1 : 0;
+    // 3.计算listView索引
+    NSInteger fromIndex = 0;
+    NSInteger toIndex = 0;
+    if(isScrollViewToRight){ // ok
+        fromIndex = currentFloorIndex;
+        toIndex = fromIndex != (_originalTitles.count - 1) ? fromIndex + 1 : fromIndex;
     }else{
-        toIndex = (_curSelectIndex + 1) == (_originalTitles.count - 1) ? _curSelectIndex + 1 : _curSelectIndex;
+        fromIndex = currentFloorIndex;
+        NSLog(@"curOffSetX:%lf, beforOffset:%lf, progress:%lf",curOffSetX,beforeOffSet, progress);
+        toIndex = (fromIndex == 0) ? fromIndex : fromIndex - 1;
     }
-    // listView transition
-    [_listView transitionFromIndex:_curSelectIndex toIndex:toIndex progress:progress animated:YES];
+    // 4.执行 listView transition动画
+    [_listView transitionFromIndex:fromIndex toIndex:toIndex progress:progress animated:YES];
 }
+#pragma mark --  FZTagListContainerView delegate
 
 #pragma mark -- FZTagListView delegate
 - (void)FZTagListView:(FZTagListView *)tagListView clickAtIndex:(NSInteger)index{
-    _curSelectIndex = index;
+    _currentSelectIndex = index;
 }
+
+#pragma mark - cache
 @end
+

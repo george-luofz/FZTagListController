@@ -15,12 +15,16 @@
 - (void)FZTagListContainerViewScrollCurrentOffSet:(CGPoint)curOffSet beforeOffSet:(CGPoint)beforeOffSet;
 @end
 
-@interface FZTagListContainerView : UIView
-@property (nonatomic, assign) id<FZTagListContainerViewDelegate> delegate;
+@interface FZTagListContainerView : UIScrollView
+@property (nonatomic, assign) id<FZTagListContainerViewDelegate> scrollDelegate;
 @property (nonatomic, assign) CGSize    contentSize;
 
+- (instancetype)initWithFrame:(CGRect)frame  NS_DESIGNATED_INITIALIZER;
+
 - (void)scrollContainerViewToOffset:(CGPoint)offSet animated:(BOOL)animated;
-//- (void)addSubView:(UIView *)view atIndex:(NSInteger)index;
 
+- (void)addSubView:(UIView *)view atIndex:(NSInteger)index;
+- (void)removeSubView:(UIView *)view atIndex:(NSInteger)index;
 
+- (void)setUpInitOffset:(CGPoint)offSet;
 @end

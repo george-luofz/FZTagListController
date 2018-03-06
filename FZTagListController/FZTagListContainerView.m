@@ -9,66 +9,48 @@
 #import "FZTagListContainerView.h"
 
 @interface FZTagListContainerView()<UIScrollViewDelegate>{
-    UIScrollView *_scrollView;
-    
     CGPoint _beforeOffset;
 }
 @end
 @implementation FZTagListContainerView
 
-- (instancetype)init{
-    if (self = [super init]){
-        
+- (instancetype)initWithFrame:(CGRect)frame{
+    if (self = [super initWithFrame:frame]){
+        [self _initProperty];
     }
     return self;
 }
 
-- (void)setFrame:(CGRect)frame{
-    [super setFrame:frame];
-    _scrollView.frame = self.bounds;
-}
-
-- (void)setContentSize:(CGSize)contentSize{
-    _scrollView.contentSize = contentSize;
-}
-
 - (void)addSubView:(UIView *)view atIndex:(NSInteger)index{
-    
+    CGRect frame = CGRectMake(index*self.frame.size.width, 0, self.frame.size.width, self.frame.size.height);
+    view.frame = frame;
+    [self addSubview:view];
 }
 
 - (void)scrollContainerViewFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
     
 }
 
+- (void)setUpInitOffset:(CGPoint)offSet{
+    _beforeOffset = offSet;
+}
 #pragma mark - private method
-- (void)_addSubViews{
-    UIScrollView *scrollView = [[UIScrollView alloc] init];
-    scrollView.showsVerticalScrollIndicator = NO;
-    scrollView.showsHorizontalScrollIndicator = NO;
-    scrollView.delegate = self;
-    scrollView.pagingEnabled = YES;
-    
-    // 1.frame
-    // 2.contantSize
-    // 3.addSubView
-    [self addSubview:scrollView];
-    _scrollView = scrollView;
+- (void)_initProperty{
+    self.showsVerticalScrollIndicator = NO;
+    self.showsHorizontalScrollIndicator = NO;
+    self.delegate = self;
+    self.pagingEnabled = YES;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView{
     // caculate progress
-//    if(curOffset.x > _beforeOffset.x){ //right scroll
-//        progress = (curOffset.x - _beforeOffset.x) / pageWidth;
-//    }else{
-//        progress = (curOffset.x - _beforeOffset.x) / pageWidth;
-//    }
-    if(self.delegate && [self.delegate respondsToSelector:@selector(FZTagListContainerViewScrollCurrentOffSet:beforeOffSet:)]){
-        [self.delegate FZTagListContainerViewScrollCurrentOffSet:scrollView.contentOffset beforeOffSet:_beforeOffset];
+    if(self.scrollDelegate && [self.scrollDelegate respondsToSelector:@selector(FZTagListContainerViewScrollCurrentOffSet:beforeOffSet:)]){
+        [self.scrollDelegate FZTagListContainerViewScrollCurrentOffSet:scrollView.contentOffset beforeOffSet:_beforeOffset];
     }
     
 }
 
-- (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView{
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView{
     // record
     _beforeOffset = scrollView.contentOffset;
 }

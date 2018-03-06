@@ -8,12 +8,13 @@
 
 #import "FZTagListView.h"
 #import "FZTagListViewCollectionViewCell.h"
+#import "FZTagListController.h"
 
 static CGFloat KDefaultTagHorizontalMargin = 10;
 static CGFloat KDefaultUnderlineHeight = 2;
 static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 
-@interface FZTagListView()<UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>{
+@interface FZTagListView()<UICollectionViewDataSource,UICollectionViewDelegateFlowLayout>{
     NSArray *_strings;
     
     UICollectionView    *_collectionView;
@@ -42,7 +43,7 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     [_collectionView reloadData];
     
     // 2.更新select
-    _currentSelectIndex = 3;
+    _currentSelectIndex = _listController.currentSelectIndex;
     // 3.更新underline frame
     [self _setupUnderlineFrame];
 }
@@ -82,7 +83,6 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 - (void)transitionFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress animated:(BOOL)animated{
     if(fromIndex == toIndex) return;
     if(toIndex == _currentSelectIndex) return;
-    _currentSelectIndex = toIndex;
     // 1.underLine
     [self _transitionUnderLineFromIndex:fromIndex toIndex:toIndex progress:progress animated:animated];
     // 2.item
@@ -124,9 +124,9 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 - (void)_transitionUnderLineFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress animated:(BOOL)animated{
     CGRect fromIndexCellFrame = [self _cellFrameAtIndex:fromIndex];
     CGRect toIndexCellFrame = [self _cellFrameAtIndex:toIndex];
-    CGFloat currentOriginX = toIndexCellFrame.origin.x - (toIndexCellFrame.origin.x - fromIndexCellFrame.origin.x) * progress;
-    CGFloat currentWidth = toIndexCellFrame.size.width - (toIndexCellFrame.size.width - fromIndexCellFrame.size.width) * progress;
-    CGRect currentUnderLineFrame = CGRectMake(currentOriginX, fromIndexCellFrame.origin.y, currentWidth, fromIndexCellFrame.size.height);
+    CGFloat currentOriginX = fromIndexCellFrame.origin.x + (toIndexCellFrame.origin.x - fromIndexCellFrame.origin.x) * progress;
+    CGFloat currentWidth = fromIndexCellFrame.size.width + (toIndexCellFrame.size.width - fromIndexCellFrame.size.width) * progress;
+    CGRect currentUnderLineFrame = CGRectMake(currentOriginX, _underLine.frame.origin.y, currentWidth, _underLine.frame.size.height);
     _underLine.frame = currentUnderLineFrame;
 }
 
