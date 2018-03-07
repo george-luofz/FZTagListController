@@ -8,6 +8,9 @@
 
 #import "ViewController.h"
 #import "FZTagListController.h"
+#import "CollectionViewController.h"
+#import "ListViewController.h"
+#import "CustomViewController.h"
 
 @interface ViewController ()<FZTagListControllerDataSource,FZTagListControllerDelegate>
 
@@ -20,7 +23,11 @@
     self.view.backgroundColor = [UIColor whiteColor];
     // Do any additional setup after loading the view, typically from a nib.
     
-    FZTagListController *controller = [[FZTagListController alloc] initWithFrame:CGRectMake(0, 88, self.view.frame.size.width, 200)];
+    [self test1];
+}
+
+- (void)test1{
+    FZTagListController *controller = [[FZTagListController alloc] initWithFrame:CGRectMake(0, 44, self.view.frame.size.width, self.view.frame.size.height - 44)];
     controller.dataSource = self;
     controller.delegate = self;
     controller.normalColor = [UIColor blackColor];
@@ -32,7 +39,8 @@
     controller.tagTopMagin = 10;
     controller.tagHorizontalMargin = 15;
     controller.tagListHeight = 44;
-
+    controller.currentSelectIndex = 2;
+    
     UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 30, 44)];
     leftView.backgroundColor = [UIColor redColor];
     controller.tagListLeftEdgeCustomView = leftView;
@@ -44,10 +52,24 @@
     [controller setUpView];
     [self.view addSubview:controller];
 }
-
 - (NSArray<NSString *> *)titles{
     return @[@"音乐",@"视频",@"经典",@"小品大全",@"美术最佳",@"电影爱好者",@"音乐",@"视频",@"经典",@"小品",@"美术",@"电影"];
 }
 
+- (UIView *)viewForTagListControllerAtIndex:(NSInteger)index{
+    if (index%3 == 0) {
+        CustomViewController *VC = [[CustomViewController alloc]init];
+        VC.text = [@(index) stringValue];
+        return VC.view;
+    }else if (index%3 == 1) {
+        ListViewController *VC = [[ListViewController alloc]init];
+        VC.text = [@(index) stringValue];
+        return VC.view;
+    }else {
+        CollectionViewController *VC = [[CollectionViewController alloc]init];
+        VC.text = [@(index) stringValue];
+        return VC.view;
+    }
+}
 
 @end

@@ -20,6 +20,7 @@ static CGFloat KDefaultTagListViewHeight = 44;
     NSArray *_originalTitles;
     
     NSCache *_cache;
+    NSMutableDictionary *_currentLoadViews;
 }
 @end
 
@@ -46,17 +47,18 @@ static CGFloat KDefaultTagListViewHeight = 44;
     // 3.containerView setup
     [self _setupContainerView];
     // 4.load view
-    for(int i = 0 ; i < _originalTitles.count ; i++){
-        CGRect frame = CGRectMake(i*self.frame.size.width, 0, self.frame.size.width, self.frame.size.height);
-        UIView *view = [[UIView alloc] initWithFrame:frame];
-        view.backgroundColor = [UIColor colorWithRed:arc4random()%255/255.0 green:arc4random()%255/255.0 blue:arc4random()%255/255.0 alpha:1.0];
-        [_listContainerView addSubview:view];
-    }
-//    if(self.dataSource && [self.dataSource respondsToSelector:@selector(viewForTagListControllerAtIndex:)]){
-//        UIView *currentLoadView = [self.dataSource viewForTagListControllerAtIndex:_currentSelectIndex];
-//        [_listContainerView addSubView:currentLoadView atIndex:_currentSelectIndex];
+//    for(int i = 0 ; i < _originalTitles.count ; i++){
+//        CGRect frame = CGRectMake(i * self.frame.size.width, 0, self.frame.size.width, self.frame.size.height);
+//        UIView *view = [[UIView alloc] initWithFrame:frame];
+//        view.backgroundColor = [UIColor colorWithRed:arc4random()%255/255.0 green:arc4random()%255/255.0 blue:arc4random()%255/255.0 alpha:1.0];
+//        [_listContainerView addSubview:view];
 //    }
-    
+    _currentLoadViews = [NSMutableDictionary dictionaryWithCapacity:_originalTitles.count];
+    if(self.dataSource && [self.dataSource respondsToSelector:@selector(viewForTagListControllerAtIndex:)]){
+        UIView *currentLoadView = [self.dataSource viewForTagListControllerAtIndex:_currentSelectIndex];
+        [_listContainerView addSubView:currentLoadView atIndex:_currentSelectIndex];
+        [_currentLoadViews setValue:currentLoadView forKey:[@(_currentSelectIndex) stringValue]];
+    }
 }
 
 - (void)_addTagListView{
@@ -102,6 +104,7 @@ static CGFloat KDefaultTagListViewHeight = 44;
     // 2. contentSize
     _listContainerView.contentSize = CGSizeMake(self.frame.size.width * _originalTitles.count, _listContainerView.frame.size.height);
     // 3. currentOffset
+    [_listContainerView scrollContainerViewToIndex:_currentSelectIndex animated:NO];
     [_listContainerView setUpInitOffset:CGPointMake(self.frame.size.width * _currentSelectIndex, 0)];
 }
 #pragma mark --  FZTagListContainerView delegate
@@ -131,16 +134,43 @@ static CGFloat KDefaultTagListViewHeight = 44;
     }
     // 4.执行 listView transition动画
     [_listView transitionFromIndex:fromIndex toIndex:toIndex progress:progress animated:YES];
+    
+    // 5.load current page view
+    [self _configurePageViewAtIndex:fromIndex toIndex:toIndex];
+    // 6.delegate
+    if(self.delegate && [self.delegate respondsToSelector:@selector(transitionFromIndex:toIndex:)]){
+        [self.delegate transitionFromIndex:fromIndex toIndex:toIndex];
+    }
 }
 
 #pragma mark -- FZTagListView delegate
 - (void)FZTagListView:(FZTagListView *)tagListView clickAtIndex:(NSInteger)index{
-    _currentSelectIndex = index;
+    
     
     // 1.scroll containerView
     [_listContainerView scrollContainerViewToIndex:index animated:NO];
+    // 2.configre page
+    [self _configurePageViewAtIndex:_currentSelectIndex toIndex:index];
+    // 3.save index
+    _currentSelectIndex = index;
+}
+
+#pragma mark - page view
+- (void)_configurePageViewAtIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex{
+    // load view
+    UIView *loadView;
+    // 1.当前加载了
+    if(_currentLoadViews[[@(toIndex) stringValue]]){
+        loadView = _currentLoadViews[[@(toIndex) stringValue]];
+    }else if(self.dataSource && [self.dataSource respondsToSelector:@selector(viewForTagListControllerAtIndex:)]){
+        // 2.当前未加载
+        loadView = [self.dataSource viewForTagListControllerAtIndex:toIndex];
+        [_listContainerView addSubView:loadView atIndex:toIndex];
+        [_currentLoadViews setValue:loadView forKey:[@(toIndex) stringValue]];
+    }
 }
 
 #pragma mark - cache
+
 @end
 

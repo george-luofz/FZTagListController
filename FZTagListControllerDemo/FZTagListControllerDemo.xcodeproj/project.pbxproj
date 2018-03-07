@@ -14,6 +14,9 @@
 		3C2617B220495FAC007F34C8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C2617B020495FAC007F34C8 /* LaunchScreen.storyboard */; };
 		3C2617B520495FAC007F34C8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C2617B420495FAC007F34C8 /* main.m */; };
 		3C2617BC204A8F82007F34C8 /* libFZTagListController.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C2617BD204A8F82007F34C8 /* libFZTagListController.a */; };
+		3C71095A204FEACE00445C0A /* CollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C710954204FEACD00445C0A /* CollectionViewController.m */; };
+		3C71095B204FEACE00445C0A /* CustomViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C710955204FEACD00445C0A /* CustomViewController.m */; };
+		3C71095C204FEACE00445C0A /* ListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C710959204FEACE00445C0A /* ListViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +31,12 @@
 		3C2617B320495FAC007F34C8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C2617B420495FAC007F34C8 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		3C2617BD204A8F82007F34C8 /* libFZTagListController.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libFZTagListController.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C710954204FEACD00445C0A /* CollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectionViewController.m; sourceTree = "<group>"; };
+		3C710955204FEACD00445C0A /* CustomViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomViewController.m; sourceTree = "<group>"; };
+		3C710956204FEACE00445C0A /* CollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectionViewController.h; sourceTree = "<group>"; };
+		3C710957204FEACE00445C0A /* CustomViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomViewController.h; sourceTree = "<group>"; };
+		3C710958204FEACE00445C0A /* ListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListViewController.h; sourceTree = "<group>"; };
+		3C710959204FEACE00445C0A /* ListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ListViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +71,12 @@
 		3C2617A420495FAC007F34C8 /* FZTagListControllerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				3C710956204FEACE00445C0A /* CollectionViewController.h */,
+				3C710954204FEACD00445C0A /* CollectionViewController.m */,
+				3C710957204FEACE00445C0A /* CustomViewController.h */,
+				3C710955204FEACD00445C0A /* CustomViewController.m */,
+				3C710958204FEACE00445C0A /* ListViewController.h */,
+				3C710959204FEACE00445C0A /* ListViewController.m */,
 				3C2617A520495FAC007F34C8 /* AppDelegate.h */,
 				3C2617A620495FAC007F34C8 /* AppDelegate.m */,
 				3C2617A820495FAC007F34C8 /* ViewController.h */,
@@ -154,6 +169,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C71095A204FEACE00445C0A /* CollectionViewController.m in Sources */,
+				3C71095B204FEACE00445C0A /* CustomViewController.m in Sources */,
+				3C71095C204FEACE00445C0A /* ListViewController.m in Sources */,
 				3C2617AA20495FAC007F34C8 /* ViewController.m in Sources */,
 				3C2617B520495FAC007F34C8 /* main.m in Sources */,
 				3C2617A720495FAC007F34C8 /* AppDelegate.m in Sources */,

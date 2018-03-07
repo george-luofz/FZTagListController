@@ -23,6 +23,7 @@
 @protocol FZTagListControllerDelegate <NSObject>
 // 样式
 // 事件
+- (void)transitionFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex;
 @end
 
 //TODO:style
@@ -53,7 +54,6 @@
 
 @property (nonatomic, assign) NSInteger currentSelectIndex;             //当前索引，默认为0，即第一项
 // 2.数据部分
-- (void)setUpStringArray:(NSArray<NSString *> *)strings;
 - (void)updateTitle:(NSString *)title atIndex:(NSInteger)index;
 - (void)updateTittles:(NSArray<NSString *> *)titles atIndexArray:(NSArray<NSNumber *> *)indexArray;
 

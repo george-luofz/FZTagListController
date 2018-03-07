@@ -84,12 +84,6 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     [self _transitionCellItemFromIndex:fromIndex toIndex:toIndex progress:progress animated:animated];
 }
 
-//- (void)layoutSubviews{
-//    [super layoutSubviews];
-//    // 4.cell item color
-//    FZTagListViewCollectionViewCell *currentSelectCell = (FZTagListViewCollectionViewCell *)[_collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_listController.currentSelectIndex inSection:0]];
-//    currentSelectCell.titleLabel.textColor = _selectedColor;
-//}
 #pragma mark - private method
 #pragma mark -- setup frames
 - (void)_setupSubViewFrame{
