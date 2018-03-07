@@ -27,6 +27,7 @@
     controller.selectedColor = [UIColor redColor];
     controller.normalFont = [UIFont systemFontOfSize:15];
     controller.selectedFont = [UIFont systemFontOfSize:18];
+    controller.selectedScale = 1.2;
     controller.underLineBgColor = [UIColor blueColor];
     controller.tagTopMagin = 10;
     controller.tagHorizontalMargin = 15;

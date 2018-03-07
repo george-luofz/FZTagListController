@@ -20,7 +20,6 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     UICollectionView    *_collectionView;
     UIView              *_underLine;
     
-    NSInteger           _currentSelectIndex;  //当前选择的索引
 }
 @end
 @implementation FZTagListView
@@ -42,9 +41,7 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     // 1.reload
     [_collectionView reloadData];
     
-    // 2.更新select
-    _currentSelectIndex = _listController.currentSelectIndex;
-    // 3.更新underline frame
+    // 2.更新underline frame
     [self _setupUnderlineFrame];
 }
 
@@ -72,8 +69,7 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 
 - (void)clickFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
     if(fromIndex == toIndex) return;
-    if(toIndex == _currentSelectIndex) return;
-    _currentSelectIndex = toIndex;
+    // TODO:selectIndex
     // 1.underLine
     [self _clickUnderLineFromIndex:fromIndex toIndex:toIndex animated:animated];
     // 2.item
@@ -82,13 +78,18 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 
 - (void)transitionFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress animated:(BOOL)animated{
     if(fromIndex == toIndex) return;
-    if(toIndex == _currentSelectIndex) return;
     // 1.underLine
     [self _transitionUnderLineFromIndex:fromIndex toIndex:toIndex progress:progress animated:animated];
     // 2.item
-    [self _transitionCellItemFromIndex:fromIndex toIndex:toIndex animated:animated];
+    [self _transitionCellItemFromIndex:fromIndex toIndex:toIndex progress:progress animated:animated];
 }
 
+//- (void)layoutSubviews{
+//    [super layoutSubviews];
+//    // 4.cell item color
+//    FZTagListViewCollectionViewCell *currentSelectCell = (FZTagListViewCollectionViewCell *)[_collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_listController.currentSelectIndex inSection:0]];
+//    currentSelectCell.titleLabel.textColor = _selectedColor;
+//}
 #pragma mark - private method
 #pragma mark -- setup frames
 - (void)_setupSubViewFrame{
@@ -111,7 +112,7 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 
 - (void)_setupUnderlineFrame{
     // x是啥，当前cell的origin
-    CGRect cellFrame = [self _cellFrameAtIndex:_currentSelectIndex];
+    CGRect cellFrame = [self _cellFrameAtIndex:_listController.currentSelectIndex];
     CGFloat underLineOriginX = cellFrame.origin.x;
     
     if (_useConstantUnderLineLength && _underlineLength){
@@ -130,10 +131,64 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     _underLine.frame = currentUnderLineFrame;
 }
 
-- (void)_transitionCellItemFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
-    
+- (void)_transitionCellItemFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress animated:(BOOL)animated{
+    // 1.scoll cellItem
+    [self _scrollCellItemToIndex:toIndex];
+    // 2.color transition
+    [self _transitionCellItemColorFromIndex:fromIndex toIndex:toIndex progress:progress];
+    // 3.scale transition
+    [self _transitionCellItemScaleFromIndex:fromIndex toIndex:toIndex progress:progress];
+}
+- (void)_scrollCellItemToIndex:(NSInteger)toIndex{
+    [_collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:toIndex inSection:0] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
 }
 
+- (void)_transitionCellItemColorFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress{
+    if(_selectedColor == nil) return;
+    
+    FZTagListViewCollectionViewCell *currentSelectCell = (FZTagListViewCollectionViewCell *)[_collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:fromIndex inSection:0]];
+    FZTagListViewCollectionViewCell *currentNormalCell = (FZTagListViewCollectionViewCell *)[_collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:toIndex inSection:0]];
+    
+    CGFloat fromR,fromG,fromB,fromA;
+    CGFloat toR,toG,toB,toA;
+    [_selectedColor getRed:&fromR green:&fromG blue:&fromB alpha:&fromA];
+    [_normalColor getRed:&toR green:&toG blue:&toB alpha:&toA];
+    
+    CGFloat currentNormalR,currentNomalG,currentNomalB,currentNomalA;
+    currentNormalR = fromR + (toR - fromR) * progress;
+    currentNomalG = fromG + (toG - fromG) * progress;
+    currentNomalB = fromB + (toB - fromB) * progress;
+    currentNomalA = fromA + (toA - fromA) * progress;
+    
+    CGFloat currentSelectR,currentSelectG,currentSelectB,currentSelectA;
+    currentSelectR = toR - (toR - fromR) * progress;
+    currentSelectG = toG - (toG - fromG) * progress;
+    currentSelectB = toB - (toB - fromB) * progress;
+    currentSelectA = toA - (toA - fromA) * progress;
+    
+    UIColor *currentNormalColor = [UIColor colorWithRed:currentNormalR green:currentNomalG blue:currentNomalB alpha:currentNomalA];
+    UIColor *currentSelectColor = [UIColor colorWithRed:currentSelectR green:currentSelectG blue:currentSelectB alpha:currentSelectA];
+    
+    currentNormalCell.titleLabel.textColor = currentSelectColor;
+    currentSelectCell.titleLabel.textColor = currentNormalColor;
+}
+
+- (void)_transitionCellItemScaleFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex progress:(CGFloat)progress{
+    if(_listController.selectedScale == 0) return;
+    
+    CGFloat scale = _listController.selectedScale;
+    CGFloat currentSelectScale = scale - (scale - 1) * progress;
+    CGFloat currentNormalScale = 1 + (scale - 1) * progress;
+    
+    [self _scaleCellItem:fromIndex scale:currentSelectScale];
+    [self _scaleCellItem:toIndex scale:currentNormalScale];
+}
+
+- (void)_scaleCellItem:(NSInteger)index scale:(CGFloat)scale{
+    FZTagListViewCollectionViewCell *currentSelectCell = (FZTagListViewCollectionViewCell *)[_collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
+    if(currentSelectCell == nil) return;
+    currentSelectCell.transform = CGAffineTransformMakeScale(scale, scale);
+}
 #pragma mark - click to index
 - (void)_clickUnderLineFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
     CGRect toIndexCellFrame = [self _cellFrameAtIndex:toIndex];
@@ -145,10 +200,11 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
 }
 
 - (void)_clickCellItemFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
-    
+    // 1.scroll item
+    [self _scrollCellItemToIndex:toIndex];
 }
-#pragma mark - subView
 
+#pragma mark - subView
 - (void)_addSubView{
     // 1.UICollectionView
     [self _addCollectionView];
@@ -176,7 +232,7 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     UIView *underLine = [[UIView alloc] init];
     _underLine = underLine;
 
-    [self addSubview:underLine];
+    [_collectionView addSubview:underLine];
 }
 
 #pragma mark - collection delegate and datasource
@@ -199,27 +255,28 @@ static CGFloat KDefaultUnderLineAnimationDuration = 0.25f;
     cell.titleLabel.text = [_strings objectAtIndex:indexPath.row];
     cell.titleLabel.textColor = _normalColor;
     cell.titleLabel.font = _normalFont;
+    
+    if(indexPath.row == _listController.currentSelectIndex){
+        cell.titleLabel.textColor = _selectedColor;
+        [self _scaleCellItem:indexPath.item scale:_listController.selectedScale];
+    }
     return cell;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     // 1.选择某个item
-    [self clickFromIndex:_currentSelectIndex toIndex:indexPath.item animated:YES];
+    [self clickFromIndex:_listController.currentSelectIndex toIndex:indexPath.item animated:YES];
     // 2.回调代理
-//    if(self.delegate && self.delegate respondsToSelector:@selector(<#selector#>))
-}
-
-#pragma mark - scrollView delegate
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView{
-    // 1. 滚动时拖动下划线跟随滚动
-    [self _setupUnderlineFrame];
+    if(self.delegate && [self.delegate respondsToSelector:@selector(FZTagListView:clickAtIndex:)]){
+        [self.delegate FZTagListView:self clickAtIndex:indexPath.item];
+    }
 }
 
 #pragma mark -- 数值处理
 
-- (CGRect)_cellFrameAtIndex:(NSInteger)index{ //这个可以计算cell frame
+- (CGRect)_cellFrameAtIndex:(NSInteger)index{
     UICollectionViewLayoutAttributes *att = [_collectionView layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
-    return  [self convertRect:att.frame fromView:_collectionView];
+    return att.frame;
 }
 
 - (CGFloat)_underLineWidthAtIndex:(NSInteger)index{

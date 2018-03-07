@@ -21,7 +21,7 @@
 
 - (instancetype)initWithFrame:(CGRect)frame  NS_DESIGNATED_INITIALIZER;
 
-- (void)scrollContainerViewToOffset:(CGPoint)offSet animated:(BOOL)animated;
+- (void)scrollContainerViewToIndex:(NSInteger)toIndex animated:(BOOL)animated;
 
 - (void)addSubView:(UIView *)view atIndex:(NSInteger)index;
 - (void)removeSubView:(UIView *)view atIndex:(NSInteger)index;

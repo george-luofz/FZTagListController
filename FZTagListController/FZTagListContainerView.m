@@ -27,8 +27,9 @@
     [self addSubview:view];
 }
 
-- (void)scrollContainerViewFromIndex:(NSInteger)fromIndex toIndex:(NSInteger)toIndex animated:(BOOL)animated{
-    
+- (void)scrollContainerViewToIndex:(NSInteger)toIndex animated:(BOOL)animated{
+    CGPoint offSet = CGPointMake(toIndex *self.frame.size.width, 0);
+    [self setContentOffset:offSet animated:animated];
 }
 
 - (void)setUpInitOffset:(CGPoint)offSet{

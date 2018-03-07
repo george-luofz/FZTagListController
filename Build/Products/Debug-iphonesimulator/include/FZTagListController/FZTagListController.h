@@ -41,6 +41,7 @@
 @property (nonatomic, strong) UIColor   *selectedColor;
 @property (nonatomic, strong) UIFont    *normalFont;
 @property (nonatomic, strong) UIFont    *selectedFont;
+@property (nonatomic, assign) CGFloat   selectedScale;      // 伸缩比例
 
 @property (nonatomic, strong) UIColor   *underLineBgColor;  // 下划线长度是否使用字体长度，默认使用
 

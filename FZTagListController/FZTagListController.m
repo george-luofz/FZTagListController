@@ -62,6 +62,7 @@ static CGFloat KDefaultTagListViewHeight = 44;
 - (void)_addTagListView{
     FZTagListView *listView = [[FZTagListView alloc] init];
     listView.delegate = self;
+    listView.listController = self;
     [self addSubview:listView];
     _listView = listView;
 }
@@ -103,36 +104,41 @@ static CGFloat KDefaultTagListViewHeight = 44;
     // 3. currentOffset
     [_listContainerView setUpInitOffset:CGPointMake(self.frame.size.width * _currentSelectIndex, 0)];
 }
-
+#pragma mark --  FZTagListContainerView delegate
 - (void)FZTagListContainerViewScrollCurrentOffSet:(CGPoint)curOffSet beforeOffSet:(CGPoint)beforeOffSet{
     // 1.计算下方滑动进度
     CGFloat curOffSetX = curOffSet.x;
     CGFloat pageWidth = _listContainerView.frame.size.width;
     CGFloat currentFloorIndex = floor(curOffSetX / pageWidth); //计算得到index
-    
     CGFloat progress = (curOffSetX - currentFloorIndex * pageWidth) / pageWidth;
     
     // 2.计算方向，告知listView索引
-    BOOL isScrollViewToRight = curOffSetX > beforeOffSet.x ? 1 : 0;
+    BOOL isScrollViewToRight = curOffSetX > beforeOffSet.x;
     // 3.计算listView索引
     NSInteger fromIndex = 0;
     NSInteger toIndex = 0;
     if(isScrollViewToRight){ // ok
         fromIndex = currentFloorIndex;
-        toIndex = fromIndex != (_originalTitles.count - 1) ? fromIndex + 1 : fromIndex;
+        toIndex   = fromIndex + 1;
     }else{
-        fromIndex = currentFloorIndex;
-        NSLog(@"curOffSetX:%lf, beforOffset:%lf, progress:%lf",curOffSetX,beforeOffSet, progress);
-        toIndex = (fromIndex == 0) ? fromIndex : fromIndex - 1;
+        fromIndex = currentFloorIndex + 1;
+        toIndex = currentFloorIndex < 0 ? 0 : currentFloorIndex;
+        progress = 1 - progress;
+    }
+    if(currentFloorIndex >= _originalTitles.count - 1){ //在最右边标签滚动时
+        fromIndex = _originalTitles.count - 1;
+        toIndex = fromIndex;
     }
     // 4.执行 listView transition动画
     [_listView transitionFromIndex:fromIndex toIndex:toIndex progress:progress animated:YES];
 }
-#pragma mark --  FZTagListContainerView delegate
 
 #pragma mark -- FZTagListView delegate
 - (void)FZTagListView:(FZTagListView *)tagListView clickAtIndex:(NSInteger)index{
     _currentSelectIndex = index;
+    
+    // 1.scroll containerView
+    [_listContainerView scrollContainerViewToIndex:index animated:NO];
 }
 
 #pragma mark - cache
